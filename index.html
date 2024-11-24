@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Class Representative Election</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .header { display: flex; align-items: center; justify-content: space-between; }
+        .header img { width: 200px; height: 200px; }
+        .hidden { display: none; }
+        .container { margin: 20px; text-align: center; } /* Center the container */
+        .participants { display: flex; flex-wrap: wrap; justify-content: center; } /* Center the participants */
+        .participant { flex: 0 0 50%; padding: 10px; text-align: center; } /* Center-align text */
+        .medium-img { width: 150px; height: 150px; display: block; margin: 0 auto; } /* Center the image */
+        .candidate-name { text-align: center; margin-top: 10px; font-size: 18px; display: flex; align-items: center; justify-content: center; } /* Center and style candidate name */
+        .candidate-name input { margin-right: 10px; } /* Add space between radio button and name */
+        .buttons { text-align: left; margin-top: 20px; } /* Align buttons to the left */
+        .results-container { text-align: center; margin-top: 20px; } /* Center the results container */
+        .results { display: inline-block; text-align: left; } /* Left-align the results */
+        .result-item { margin-bottom: 50px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="Federal Govt Logo.png" alt="Govt Logo" class="small-img">
+            <h1>Class Representative Election</h1>
+            <img src="HITMS Logo.jpg" alt="HITMS Logo" class="small-img">
+        </div>
+        <div id="class-selection">
+            <h1>Choose Your Class</h1>
+            <select id="classSelect" onchange="updatePlaceholder()">
+                <option value="">--Select Class--</option>
+                <option value="CS-01">CS-01</option>
+                <option value="CS-02">CS-02</option>
+                <option value="CS-03">CS-03</option>
+                <option value="SWE-01">SWE-01</option>
+                <option value="SWE-02">SWE-02</option>
+            </select>
+            <br><br><br>
+            <div id="rollNumberContainer">
+                <span id="rollNumberPrefix"></span>
+                <input type="text" id="rollNumber" placeholder="XXX (last 3 digits)">
+            </div>
+            <button onclick="validateRollNumber()">Submit</button>
+        </div>
+
+        <div id="voting-section" class="hidden">
+            <h2 id="classTitle"></h2>
+            <div class="participants" id="participants"></div>
+        </div>
+
+        <div class="buttons">
+            <button onclick="submitVote()">Submit Vote</button>
+            <button onclick="showPasswordPrompt()">Show Results</button>
+        </div>
+        
+        <div class="results-container">
+            <div class="results hidden" id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        const participantsData = {
+            'CS-01': [
+                { name: 'Muhammad Hassan Moughal', img: 'Muhammad Hassan Moughal.jpg' },
+                { name: 'Abdullah Nadeem', img: 'Abdullah Nadeem.png' },
+                { name: 'Anoush', img: 'Anoush.jpg' },
+                { name: 'Zainab', img: 'Zainab.jpg' }
+            ],
+            'CS-02': [
+                { name: 'Shaikh Muhammad Khurram', img: 'Shaikh Muhammad Khurram.jpg' },
+                { name: 'Hamza Ahmed Khan', img: 'Hamza Ahmed Khan.jpg' },
+                { name: 'Suman', img: 'Suman.jpg' }
+            ],
+            'CS-03': [
+                { name: 'Razi Ullah Qaim Khani', img: 'Razi Ullah Qaim Khani.jpg' },
+                { name: 'Sheharyar Shaikh', img: 'Sheharyar Shaikh.jpg' },
+                { name: 'Nabiha Warsi', img: 'Nabiha Warsi.jpg' },
+                { name: 'Abdul Rafay', img: 'Abdul Rafay.jpg' }
+            ],
+            'SWE-01': [
+                { name: 'Saif Ur Rehman', img: 'Saif Ur Rehman.jpg' },
+                { name: 'Mehak', img: 'Mehak.png' },
+                { name: 'Anisha Aslam', img: 'Anisha Aslam.png' }
+            ],
+            'SWE-02': [
+                { name: 'Muzammil Hussain', img: 'HITMS Logo.jpg' },
+                { name: 'Saad Shaikh', img: 'Saad Shaikh.jpg' },
+                { name: 'Bisma Ellahi', img: 'Bisma Ellahi.jpg' },
+                { name: 'Uzair Ahmed Khan', img: 'Uzair Ahmed Khan.jpg' },
+                { name: 'Syed Abdul Wahab', img: 'Syed Abdul Wahab.jpg' }
+            ]
+        };
+
+        function updatePlaceholder() {
+            const selectedClass = document.getElementById('classSelect').value;
+            const rollNumberPrefix = document.getElementById('rollNumberPrefix');
+            if (selectedClass.startsWith("CS")) {
+                rollNumberPrefix.textContent = "24BSCS";
+            } else if (selectedClass.startsWith("SWE")) {
+                rollNumberPrefix.textContent = "24BSSW";
+            } else {
+                rollNumberPrefix.textContent = "";
+            }
+        }
+
+        function validateRollNumber() {
+            const selectedClass = document.getElementById('classSelect').value;
+            const rollNumber = document.getElementById('rollNumberPrefix').textContent + document.getElementById('rollNumber').value;
+
+            if (isValidRollNumber(selectedClass, rollNumber)) {
+                document.getElementById('classTitle').textContent = selectedClass;
+                document.getElementById('voting-section').classList.remove('hidden');
+                populateParticipants(selectedClass);
+            } else {
+                alert('Invalid roll number for selected class!');
+            }
+        }
+
+        function isValidRollNumber(selectedClass, rollNumber) {
+            switch (selectedClass) {
+                case 'CS-01':
+                    return /^24BSCS0[0-4][0-9]$/.test(rollNumber);
+                case 'CS-02':
+                    return /^24BSCS1[0-4][0-9]$/.test(rollNumber);
+                case 'CS-03':
+                    return /^24BSCS2[0-4][0-9]$/.test(rollNumber);
+                case 'SWE-01': 
+                    return /^24BSSW0[0-9][13579]$/.test(rollNumber); // Only odd roll numbers from 24BSSW001 to 24BSSW099 
+                case 'SWE-02': 
+                    return /^24BSSW0[0-9][02468]$/.test(rollNumber) || rollNumber === "24BSSW100"; // Only even roll numbers from 24BSSW002 to 24BSSW100, including 24BSSW100 
+                default: 
+                     return false;
+            }
+        }
+
+        function populateParticipants(selectedClass) {
+            const participantsContainer = document.getElementById('participants');
+            participantsContainer.innerHTML = '';
+
+            participantsData[selectedClass].forEach(participant => {
+                let participantDiv = document.createElement('div');
+                participantDiv.className = 'participant';
+                participantDiv.innerHTML = `
+                    <img src="${participant.img}" alt="${participant.name}" class="medium-img">
+                    <div class="candidate-name">
+                        <input type="radio" name="candidate" value="${participant.name}"> ${participant.name}
+                    </div>
+                `;
+                participantsContainer.appendChild(participantDiv);
+            });
+        }
+
+        function submitVote() {
+            let selectedClass = document.getElementById('classSelect').value;
+            if (!selectedClass) return;
+
+            let selectedCandidate = document.querySelector('input[name="candidate"]:checked');
+            if (!selectedCandidate) return;
+
+            let votes = JSON.parse(localStorage.getItem('votes')) || {};
+            if (!votes[selectedClass]) {
+                votes[selectedClass] = {};
+            }
+
+            let candidate = selectedCandidate.value.replace(/ /g, "_");
+            if (!votes[selectedClass][candidate]) {
+                votes[selectedClass][candidate] = 0;
+            }
+            votes[selectedClass][candidate]++;
+
+            localStorage.setItem('votes', JSON.stringify(votes));
+            alert("Your vote has been submitted!");
+            location.reload();
+        }
+
+               function showPasswordPrompt() {
+            let password = prompt("Please enter the password to view the results:");
+            if (password === "Hitms123$") { // Replace "your_password" with your desired password
+                calculateResults();
+            } else {
+                alert("Incorrect password!");
+            }
+        }
+
+        function calculateResults() {
+            let votes = JSON.parse(localStorage.getItem('votes')) || {};
+
+            const classOrder = ['CS-01', 'CS-02', 'CS-03', 'SWE-01', 'SWE-02'];
+            let resultsHtml = '<h2>Results</h2>';
+
+            classOrder.forEach(classCategory => {
+                let totalVotes = 0;
+                if (votes[classCategory]) {
+                    Object.values(votes[classCategory]).forEach(voteCount => {
+                        totalVotes += voteCount;
+                    });
+                }
+
+                resultsHtml += `<div class="result-item"><strong>${classCategory} (Total Votes: ${totalVotes}):</strong>`;
+                participantsData[classCategory].forEach(participant => {
+                    const participantName = participant.name.replace(/ /g, "_");
+                    const voteCount = votes[classCategory] && votes[classCategory][participantName] ? votes[classCategory][participantName] : 0;
+                    resultsHtml += `<p>${participant.name}: ${voteCount}</p>`;
+                });
+                resultsHtml += '</div>';
+            });
+
+            document.getElementById('results').innerHTML = resultsHtml;
+            document.getElementById('results').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
